@@ -53,7 +53,7 @@ def get_channel_videos(channel_id, api_key) -> list[Video]:
                 title=item["snippet"]["title"],
                 video_id=item["id"]["videoId"],
                 description=item["snippet"]["description"],
-                is_short="maxres" not in item["snippet"],
+                is_short="maxres" not in item["snippet"]["thumbnails"],
             )
             videos.append(video)
 
@@ -65,7 +65,7 @@ def get_channel_videos(channel_id, api_key) -> list[Video]:
     return videos
 
 
-def get_transcript(video: Video) -> list[str]:
+def get_video_transcript(video: Video) -> list[str]:
 
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video.video_id)
