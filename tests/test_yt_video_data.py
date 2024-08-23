@@ -2,23 +2,6 @@ import pytest
 from yt_info.yt_video_data import Video, get_channel_videos, get_video_transcript
 
 
-# Mocked data for tests
-mock_video_data = {
-    "snippet": {
-        "title": "Test Video",
-        "description": "Test Description",
-    },
-    "id": {
-        "videoId": "test_video_id",
-    },
-}
-
-mock_transcript_data = [
-    {"text": "This is a test transcript line 1", "start": 0.0, "duration": 4.0},
-    {"text": "This is a test transcript line 2", "start": 4.0, "duration": 5.0},
-]
-
-
 # Test Video class
 def test_video_url():
     video = Video(
