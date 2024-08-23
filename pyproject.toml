@@ -4,12 +4,17 @@ version = "0.1.0"
 description = ""
 authors = ["psousasa"]
 readme = "README.md"
+packages = [{ include = "yt_info", from = "src" },
+            { include = "yt_rag", from = "src" },]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 python-dotenv = "^1.0.1"
 google-api-python-client = "^2.142.0"
 youtube-transcript-api = "^0.6.2"
+sentence-transformers = "^3.0.1"
+elasticsearch = "^8.15.0"
+tqdm = "^4.66.5"
 
 
 [tool.poetry.group.dev.dependencies]
