@@ -70,6 +70,5 @@ def get_transcript(video: Video) -> list[str]:
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video.video_id)
         return transcript
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-        return None
+    except Exception as exception:
+        raise exception
