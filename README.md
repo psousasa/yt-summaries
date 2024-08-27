@@ -1,28 +1,75 @@
 # yt-summaries
-RAG implementation to provide relevant info on video transcripts from specific YT channels
+RAG implementation to provide relevant info from video transcripts of specific YT channels.
+
+Initially designed to serve as a cooking assistant, taking in cooking channels and providing recipes based on the video transcripts.
+
+This RAG flow can be easily adapted to other channels and make it quick to create new assistants.
 
 ## Idea
-Get key info from video transcripts.
-1. List all videos from a given list of YT Channels and retrieve relevant info:
+Build knowledge base (KB) from YT videos data.
+1. List all videos from a given list of YT Channels and build KB from:
 - title
 - video id
 - description
-- if it is a short format video).
-
-2. Index the RAG on the video title and descriptions. 
-3. Return the summarized transcripts from the top matches.
+- if it is a short format video.
+2. Index the KB on the videos title and description. 
+3. Get user query through Streamlit.
+4. Query the KB and get relevant videos.
+5. Get the transcripts of the relevant videos.
+6. Call the LLM, asking it to summarize and retrieve recipes from the transcripts.
+7. Output the summary through Streamlit.
 
 
 ~~~
-Note: Short format often have no description and have less structured dialogue, making them less structured for this RAG.
+Note: Short format often have no description and have less structured dialogue, making them less than ideal for this RAG.
 ~~~
+
+## Dataset
+The dataset is made of YT videos info - details and english transcript. The channel(s) from which to retrieve the videos is predefined. \
+**Details** retrieved using:
+```python
+pip install google-api-python-client
+```
+
+**Transcripts** retrieved using:
+```python
+pip install youtube-transcript-api
+```
+
+## How to Run
+
+### Prerequisites
+- Docker.
+- 20Gb RAM.
+- Clone the repo.
+- Environment variables:
+    1. Create copy of *sample.env* named *.env* in same directory.
+    2. Fill in variables.
+
+### Launching the Assistant
+1. Open a terminal in the repo root.
+2. Build the container. This will:
+```bash
+docker compose up
+```
+- Load the data from the predefined YT channels.
+- Index the KB.
+- Launch the Streamlit App in a browser.
+
+
+### Evaluation
+
+#### Retrieval
+
+#### RAG
+
 
 ## Scoring Objectives
 
 * Problem description
-    * [ ] 2 points: The problem is well-described and it's clear what problem the project solves
+    * [x] 2 points: The problem is well-described and it's clear what problem the project solves
 * RAG flow
-    * [ ] 2 points: Both a knowledge base and an LLM are used in the RAG flow 
+    * [x] 2 points: Both a knowledge base and an LLM are used in the RAG flow 
 * Retrieval evaluation
     * [ ] 0 points: No evaluation of retrieval is provided
     * [ ] 1 point: Only one retrieval approach is evaluated
@@ -32,19 +79,17 @@ Note: Short format often have no description and have less structured dialogue, 
     * [ ] 1 point: Only one RAG approach (e.g., one prompt) is evaluated
     * [ ] 2 points: Multiple RAG approaches are evaluated, and the best one is used
 * Interface
-    * [ ] 2 points: UI (e.g., Streamlit), web application (e.g., Django), or an API (e.g., built with FastAPI) 
+    * [x] 2 points: UI (e.g., Streamlit), web application (e.g., Django), or an API (e.g., built with FastAPI) 
 * Ingestion pipeline
-    * [ ] 2 points: Automated ingestion with a Python script or a special tool (e.g., Mage, dlt, Airflow, Prefect)
+    * [x] 2 points: Automated ingestion with a Python script or a special tool (e.g., Mage, dlt, Airflow, Prefect)
 * Monitoring
     * [ ] 0 points: No monitoring
     * [ ] 1 point: User feedback is collected OR there's a monitoring dashboard
     * [ ] 2 points: User feedback is collected and there's a dashboard with at least 5 charts
 * Containerization
-    * [ ] 2 points: Everything is in docker-compose
+    * [x] 2 points: Everything is in docker-compose
 * Reproducibility
-    * [ ] 0 points: No instructions on how to run the code, the data is missing, or it's unclear how to access it
-    * [ ] 1 point: Some instructions are provided but are incomplete, OR instructions are clear and complete, the code works, but the data is missing
-    * [ ] 2 points: Instructions are clear, the dataset is accessible, it's easy to run the code, and it works. The versions for all dependencies are specified.
+    * [x] 2 points: Instructions are clear, the dataset is accessible, it's easy to run the code, and it works. The versions for all dependencies are specified.
 * Best practices
     * [ ] Hybrid search: combining both text and vector search (at least evaluating it) (1 point)
     * [ ] Document re-ranking (1 point)
