@@ -12,7 +12,7 @@ load_dotenv()
 
 embedding_model = SentenceTransformer("multi-qa-distilbert-cos-v1")
 
-es_endpoint = os.getenv("ES_ENDPOINT")
+es_endpoint = os.getenv("ES_URL")
 es_client = Elasticsearch(es_endpoint)
 
 
@@ -66,7 +66,7 @@ def build_index(videos: list[Video], embeddings, index_name):
     print("...indexing done.")
 
 
-if __name__ == "__main__":
+def main():
     index_name = os.getenv("ES_INDEX_NAME")
 
     if not es_client.indices.exists(index=index_name):
@@ -79,3 +79,7 @@ if __name__ == "__main__":
 
         embeddings = create_embeddings(videos)
         build_index(videos, embeddings, index_name)
+
+
+if __name__ == "__main__":
+    main()
