@@ -15,6 +15,25 @@ class Video:
         return f"https://www.youtube.com/watch?v={self.video_id}"
 
 
+def get_video_details(video_id, api_key) -> Video:
+    youtube = build("youtube", "v3", developerKey=api_key)
+
+    request = youtube.videos().list(part="snippet", id=video_id)
+    response = request.execute()
+
+    if "items" in response and len(response["items"]) > 0:
+        item = response["items"][0]
+        video = Video(
+            title=item["snippet"]["title"],
+            video_id=video_id,
+            description=item["snippet"]["description"].split("FOLLOW ME:")[0],
+            is_short="maxres" not in item["snippet"]["thumbnails"],
+        )
+        return video
+    else:
+        return "Video Not Found"
+
+
 def get_channel_videos(channel_id, api_key) -> list[Video]:
     """_summary_
 
@@ -49,13 +68,9 @@ def get_channel_videos(channel_id, api_key) -> list[Video]:
 
         for item in response["items"]:
 
-            video = Video(
-                title=item["snippet"]["title"],
-                video_id=item["id"]["videoId"],
-                description=item["snippet"]["description"],
-                is_short="maxres" not in item["snippet"]["thumbnails"],
-            )
-            videos.append(video)
+            video_id = item["id"]["videoId"]
+
+            videos.append(get_video_details(video_id, api_key))
 
         next_page_token = response.get("nextPageToken")
 
