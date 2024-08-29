@@ -71,9 +71,9 @@ CONTEXT:
     return prompt_template.format(question=query, context=context).strip()
 
 
-def llm(prompt):
+def llm(prompt, client=ollama_client):
     start_time = time.time()
-    response = ollama_client.chat.completions.create(
+    response = client.chat.completions.create(
         model="phi3",
         messages=[{"role": "user", "content": prompt}],
     )
@@ -87,7 +87,7 @@ def llm(prompt):
     end_time = time.time()
     response_time = end_time - start_time
 
-    return answer, tokens, response_time
+    return answer
 
 
 def get_answer(query):
