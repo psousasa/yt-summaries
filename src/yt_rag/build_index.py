@@ -16,23 +16,32 @@ es_endpoint = os.getenv("ES_URL")
 es_client = Elasticsearch(es_endpoint)
 
 
-def embed(video: Video) -> np.array:
+def embed_title_description(video: Video) -> np.array:
 
     video_text = f"{video.title} {video.description}".strip()
 
     return embedding_model.encode(video_text)
 
 
-def create_embeddings(videos: list[Video]) -> list[np.array]:
+def embed_title(video: Video) -> np.array:
+
+    video_text = f"{video.title}".strip()
+
+    return embedding_model.encode(video_text)
+
+
+def create_embeddings(
+    videos: list[Video], embedding_function=embed_title_description
+) -> list[np.array]:
     embeddings = []
     print("Starting embedding...")
     for video in tqdm(videos):
-        embeddings.append(embed(video))
+        embeddings.append(embedding_function(video))
     print("...embedding done.")
     return embeddings
 
 
-def build_index(videos: list[Video], embeddings, index_name):
+def build_index(videos: list[Video], embeddings, index_name, es_client=es_client):
 
     index_settings = {
         "settings": {"number_of_shards": 1, "number_of_replicas": 0},

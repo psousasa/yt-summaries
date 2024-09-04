@@ -21,7 +21,7 @@ OLLAMA_URL = os.getenv("OLLAMA_URL")
 ollama_client = OpenAI(base_url=OLLAMA_URL, api_key="ollama")
 
 
-def elastic_search_knn(field, vector):
+def elastic_search_knn(field, vector, es_client=es_client):
     knn = {
         "field": field,
         "query_vector": vector,

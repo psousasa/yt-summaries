@@ -42,6 +42,11 @@ pip install google-api-python-client
 pip install youtube-transcript-api
 ```
 
+## Setup
+
+### Grafana 
+Setting up ```user: 0```because of ownership issues when creating the grafana container.
+
 
 ## How to Run
 
@@ -77,6 +82,10 @@ docker compose up
 
 #### Retrieval
 
+Title + descripts and Phi3-Mini yields
+```{'hit_rate': 0.6947574718275356, 'mrr': 0.5127479915696481}```
+
+
 #### RAG
 
 ## Scoring Objectives
@@ -86,8 +95,7 @@ docker compose up
 * RAG flow
     * [x] 2 points: Both a knowledge base and an LLM are used in the RAG flow 
 * Retrieval evaluation
-    * [ ] 0 points: No evaluation of retrieval is provided
-    * [ ] 1 point: Only one retrieval approach is evaluated
+    * [x] 1 point: Only one retrieval approach is evaluated
     * [ ] 2 points: Multiple retrieval approaches are evaluated, and the best one is used
 * RAG evaluation
     * [ ] 0 points: No evaluation of RAG is provided
