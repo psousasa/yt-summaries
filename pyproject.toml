@@ -1,11 +1,12 @@
 [tool.poetry]
 name = "yt-summaries"
-version = "0.2.2"
+version = "0.4.1"
 description = ""
 authors = ["psousasa"]
 readme = "README.md"
 packages = [{ include = "yt_info", from = "src" },
-            { include = "yt_rag", from = "src" },]
+            { include = "yt_rag", from = "src" },
+            { include = "db", from = "src" },]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -17,6 +18,7 @@ elasticsearch = "^8.15.0"
 tqdm = "^4.66.5"
 streamlit = "^1.37.1"
 openai = "^1.42.0"
+psycopg2-binary = "^2.9.9"
 
 
 [tool.poetry.group.dev.dependencies]
