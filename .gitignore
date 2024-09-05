@@ -165,3 +165,7 @@ cython_debug/
 
 # VS Code
 .vscode
+
+# APP specific folders
+grafana/
+postgres/
