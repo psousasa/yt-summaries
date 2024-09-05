@@ -54,12 +54,12 @@ Setting up ```user: 0```because of ownership issues when creating the grafana co
 
 - Docker.
 - Python's build module
-- <20Gb RAM (using Ollama/Phi3 and for the default YT channel).
 - Clone the repo.
 - Environment variables:
     1. Create copy of *sample.env* named *.env* in same directory.
     2. Fill in variables.
 
+```Note: Limited Elasticsearch memory```
 
 ### Launching the Assistant
 
@@ -82,9 +82,10 @@ docker compose up
 
 #### Retrieval
 
-Title + descripts and Phi3-Mini yields
+Old prompt + Title + descripts and Phi3-Mini and Temp = default yields 
 ```{'hit_rate': 0.6947574718275356, 'mrr': 0.5127479915696481}```
-
+new prompt + Title + descripts and Phi3-Mini and Temp = 0 yields
+```{'hit_rate': 0.742724588781105, 'mrr': 0.5268124092038056}```
 
 #### RAG
 
@@ -99,7 +100,7 @@ Title + descripts and Phi3-Mini yields
     * [ ] 2 points: Multiple retrieval approaches are evaluated, and the best one is used
 * RAG evaluation
     * [ ] 0 points: No evaluation of RAG is provided
-    * [ ] 1 point: Only one RAG approach (e.g., one prompt) is evaluated
+    * [x] 1 point: Only one RAG approach (e.g., one prompt) is evaluated
     * [ ] 2 points: Multiple RAG approaches are evaluated, and the best one is used
 * Interface
     * [x] 2 points: UI (e.g., Streamlit), web application (e.g., Django), or an API (e.g., built with FastAPI) 
