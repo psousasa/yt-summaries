@@ -53,12 +53,12 @@ def title_description_vector_knn(question: str) -> list[dict]:
 
 def build_prompt(query, videos: list[Video], transcripts: str) -> str:
     prompt_template = """
-You're a cook and recipe developer. Answer the QUESTION based on the CONTEXT from the Video transcripts.
-Use only the facts from the CONTEXT when answering the QUESTION.
+You are a professional cook and recipe developer. Answer the QUESTION using only the information provided in the CONTEXT from the video transcript.
+Do not include any information, assumptions, or details not present in the CONTEXT. If the CONTEXT does not provide enough information to answer the QUESTION, acknowledge the limitation.
 
 QUESTION: {question}
 
-CONTEXT: 
+CONTEXT:
 {context}
 """.strip()
 
@@ -74,8 +74,7 @@ CONTEXT:
 def llm(prompt, client=ollama_client):
     start_time = time.time()
     response = client.chat.completions.create(
-        model="phi3",
-        messages=[{"role": "user", "content": prompt}],
+        model="phi3", messages=[{"role": "user", "content": prompt}], temperature=0
     )
     answer = response.choices[0].message.content
     tokens = {
@@ -91,6 +90,7 @@ def llm(prompt, client=ollama_client):
 
 
 def get_answer(query):
+
     videos = title_description_vector_knn(query)
     videos = [Video(**video) for video in videos]
 
@@ -99,7 +99,7 @@ def get_answer(query):
         transcript = get_video_transcript(video)
         transcripts.append("\n".join([line["text"] for line in transcript]))
 
-    prompt = build_prompt(query, videos, transcripts)
+    prompt = build_prompt(query, videos[:1], transcripts)
     answer = llm(prompt)
 
     return answer
