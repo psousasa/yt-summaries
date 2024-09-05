@@ -12,13 +12,15 @@ load_dotenv()
 
 embedding_model = SentenceTransformer("multi-qa-distilbert-cos-v1")
 
-ES_URL = os.getenv("ES_URL")
+ES_URL = os.getenv("LOCAL_ES_URL")
 INDEX_NAME = os.getenv("ES_INDEX_NAME")
 es_client = Elasticsearch(ES_URL)
 
 
-OLLAMA_URL = os.getenv("OLLAMA_URL")
+OLLAMA_URL = os.getenv("LOCAL_OLLAMA_URL")
 ollama_client = OpenAI(base_url=OLLAMA_URL, api_key="ollama")
+
+clients = {"ollama/phi3mini": ollama_client}
 
 
 def elastic_search_knn(field, vector, es_client=es_client):
@@ -86,12 +88,35 @@ def llm(prompt, client=ollama_client):
     end_time = time.time()
     response_time = end_time - start_time
 
-    return answer
+    return answer, response_time, tokens
 
 
-def get_answer(query):
+def text_search(query):
+    pass
 
-    videos = title_description_vector_knn(query)
+
+def calculate_openai_cost(model_choice, tokens):
+    openai_cost = 0
+
+    if model_choice == "openai/gpt-3.5-turbo":
+        openai_cost = (
+            tokens["prompt_tokens"] * 0.0015 + tokens["completion_tokens"] * 0.002
+        ) / 1000
+    elif model_choice in ["openai/gpt-4o", "openai/gpt-4o-mini"]:
+        openai_cost = (
+            tokens["prompt_tokens"] * 0.03 + tokens["completion_tokens"] * 0.06
+        ) / 1000
+
+    return openai_cost
+
+
+def get_answer(query, model_choice="ollama/phi3mini", search_type="vector"):
+
+    if search_type == "vector":
+        videos = title_description_vector_knn(query)
+    elif search_type == "text":
+        pass
+
     videos = [Video(**video) for video in videos]
 
     transcripts = []
@@ -100,6 +125,22 @@ def get_answer(query):
         transcripts.append("\n".join([line["text"] for line in transcript]))
 
     prompt = build_prompt(query, videos[:1], transcripts)
-    answer = llm(prompt)
 
-    return answer
+    answer, response_time, tokens = llm(prompt, client=clients[model_choice])
+
+    openai_cost = calculate_openai_cost(model_choice, tokens)
+
+    return {
+        "answer": answer,
+        "response_time": response_time,
+        "relevance": "NOT_IMPLEMENTED",
+        "relevance_explanation": "NOT_IMPLEMENTED",
+        "model_used": model_choice,
+        "prompt_tokens": tokens["prompt_tokens"],
+        "completion_tokens": tokens["completion_tokens"],
+        "total_tokens": tokens["total_tokens"],
+        "eval_prompt_tokens": 0,  # eval_tokens["prompt_tokens"],
+        "eval_completion_tokens": 0,  # eval_tokens["completion_tokens"],
+        "eval_total_tokens": 0,  # eval_tokens["total_tokens"],
+        "openai_cost": openai_cost,
+    }
