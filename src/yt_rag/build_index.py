@@ -5,6 +5,7 @@ from tqdm.auto import tqdm
 from ast import literal_eval
 import numpy as np
 from dotenv import load_dotenv
+import pickle
 
 from yt_info.yt_video_data import get_channel_videos, Video
 
@@ -75,16 +76,29 @@ def build_index(videos: list[Video], embeddings, index_name, es_client=es_client
     print("...indexing done.")
 
 
+def get_yt_videos():
+    channels = literal_eval(os.getenv("YT_CHANNELS"))
+    yt_api_key = os.getenv("YT_API_KEY")
+    videos = get_channel_videos(
+        channel_id=channels["Joshua Weissman"], api_key=yt_api_key
+    )
+    return videos
+
+
 def main():
     index_name = os.getenv("ES_INDEX_NAME")
 
     if not es_client.indices.exists(index=index_name):
 
+        # avoid indexing from youtube, use pre-downloaded data instead
         channels = literal_eval(os.getenv("YT_CHANNELS"))
         yt_api_key = os.getenv("YT_API_KEY")
         videos = get_channel_videos(
             channel_id=channels["Joshua Weissman"], api_key=yt_api_key
         )
+
+        with open("./data/yt_videos_details.pkl", "rb") as f:
+            videos = pickle.load(f)
 
         embeddings = create_embeddings(videos)
         build_index(videos, embeddings, index_name)

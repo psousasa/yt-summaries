@@ -32,7 +32,7 @@ services:
       - ./.env:/.env
       - ./setup_python.sh:/setup_python.sh
       - ./dist/:/dist
-      - ./data:/data
+      - ./data/:/data/
     ports:
       - "8501:8501" 
     depends_on:
