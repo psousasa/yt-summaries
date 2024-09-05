@@ -13,7 +13,7 @@ load_dotenv()
 
 embedding_model = SentenceTransformer("multi-qa-distilbert-cos-v1")
 
-es_endpoint = os.getenv("ES_URL")
+es_endpoint = os.getenv("LOCAL_ES_URL")
 es_client = Elasticsearch(es_endpoint)
 
 
@@ -51,7 +51,6 @@ def build_index(videos: list[Video], embeddings, index_name, es_client=es_client
                 "title": {"type": "text"},
                 "is_short": {"type": "text"},
                 "description": {"type": "text"},
-                "course": {"type": "keyword"},
                 "video_id": {"type": "keyword"},
                 "title_description_vector": {
                     "type": "dense_vector",
@@ -91,11 +90,6 @@ def main():
     if not es_client.indices.exists(index=index_name):
 
         # avoid indexing from youtube, use pre-downloaded data instead
-        channels = literal_eval(os.getenv("YT_CHANNELS"))
-        yt_api_key = os.getenv("YT_API_KEY")
-        videos = get_channel_videos(
-            channel_id=channels["Joshua Weissman"], api_key=yt_api_key
-        )
 
         with open("./data/yt_videos_details.pkl", "rb") as f:
             videos = pickle.load(f)

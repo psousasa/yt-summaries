@@ -33,7 +33,7 @@ def elastic_search_knn(field, vector, es_client=es_client):
 
     search_query = {
         "knn": knn,
-        "_source": ["title", "is_short", "description", "course", "video_id"],
+        "_source": ["title", "is_short", "description", "video_id"],
     }
 
     es_results = es_client.search(index=INDEX_NAME, body=search_query)
@@ -44,6 +44,27 @@ def elastic_search_knn(field, vector, es_client=es_client):
         result_docs.append(hit["_source"])
 
     return result_docs
+
+
+def elastic_search_text(query):
+    search_query = {
+        "_source": ["title", "is_short", "description", "video_id"],
+        "size": 5,
+        "query": {
+            "bool": {
+                "must": {
+                    "multi_match": {
+                        "query": query,
+                        "fields": ["title", "description"],
+                        "type": "best_fields",
+                    }
+                },
+            }
+        },
+    }
+
+    response = es_client.search(index=INDEX_NAME, body=search_query)
+    return [hit["_source"] for hit in response["hits"]["hits"]]
 
 
 def title_description_vector_knn(question: str) -> list[dict]:
@@ -115,8 +136,7 @@ def get_answer(query, model_choice="ollama/phi3mini", search_type="vector"):
     if search_type == "vector":
         videos = title_description_vector_knn(query)
     elif search_type == "text":
-        pass
-
+        videos = elastic_search_text(query)
     videos = [Video(**video) for video in videos]
 
     transcripts = []
