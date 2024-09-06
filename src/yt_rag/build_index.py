@@ -13,7 +13,7 @@ load_dotenv()
 
 embedding_model = SentenceTransformer("multi-qa-distilbert-cos-v1")
 
-es_endpoint = os.getenv("LOCAL_ES_URL")
+es_endpoint = os.getenv("ES_URL")
 es_client = Elasticsearch(es_endpoint)
 
 

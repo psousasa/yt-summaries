@@ -12,12 +12,12 @@ load_dotenv()
 
 embedding_model = SentenceTransformer("multi-qa-distilbert-cos-v1")
 
-ES_URL = os.getenv("LOCAL_ES_URL")
+ES_URL = os.getenv("ES_URL")
 ES_INDEX_NAME = os.getenv("ES_INDEX_NAME")
 es_client = Elasticsearch(ES_URL)
 
 
-OLLAMA_URL = os.getenv("LOCAL_OLLAMA_URL")
+OLLAMA_URL = os.getenv("OLLAMA_URL")
 ollama_client = OpenAI(base_url=OLLAMA_URL, api_key="ollama")
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
