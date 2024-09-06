@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from googleapiclient.discovery import build
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled
 
 
 @dataclass(slots=False)
@@ -85,5 +85,7 @@ def get_video_transcript(video: Video) -> list[str]:
     try:
         transcript = YouTubeTranscriptApi.get_transcript(video.video_id)
         return transcript
+    except TranscriptsDisabled as exception:
+        raise exception
     except Exception as exception:
         raise exception
