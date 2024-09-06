@@ -9,7 +9,7 @@ pid=$!
 sleep 5
 
 echo "🔴 Retrieve Phi3 model..."
-ollama pull phi3
+ollama pull phi3:mini
 echo "🟢 Done!"
 
 # Wait for Ollama process to finish.
