@@ -2,19 +2,19 @@
 
 RAG implementation to provide relevant info from video transcripts of specific YT channels.
 
-Initially designed to serve as a cooking assistant, taking in cooking channels and providing recipes based on the video transcripts.
+Initially designed to serve as a cooking assistant, taking in cooking channels and providing recipes and tips based on the video transcripts.
 
 This RAG flow can be easily adapted to other channels and make it quick to create new assistants.
 
 
-## Idea
+## Flow
 
 Build knowledge base (KB) from YT videos data.
 1. List all videos from a given list of YT Channels and build KB from:
 - title
 - video id
 - description
-- if it is a short format video.
+- if it is a short format video *.
 2. Index the KB on the videos title and description. 
 3. Get user query through Streamlit.
 4. Query the KB and get relevant videos.
@@ -24,28 +24,112 @@ Build knowledge base (KB) from YT videos data.
 
 
 ~~~
-Note: Short format videos often have no description and have less structured dialogue, making them less ideal for this RAG.
+* Note: Short format videos often have no description and have less structured dialogue, making them less ideal for this RAG.
 ~~~
 
 
 ## Dataset
 
-The dataset is made of YT videos info - details and english transcript. The channel(s) from which to retrieve the videos is predefined. \
+The dataset is made of YT videos info - details and english transcript. The channel(s) from which to retrieve the videos needs to be predefined. The cooking channel [Joshua Weissman](https://www.youtube.com/@JoshuaWeissman) was used.
 
-**Details** retrieved using:
+**YT Video Details** retrieved using:
 ```python
 pip install google-api-python-client
 ```
 
-**Transcripts** retrieved using:
+
+**YT Video Transcripts** retrieved using:
 ```python
 pip install youtube-transcript-api
 ```
 
 ## Setup
 
-### Grafana 
-Setting up ```user: 0```because of ownership issues when creating the grafana container.
+This project uses Docker Compose to orchestrate various services for a scalable, AI-powered application. The setup includes:
+- Elasticsearch for the vector db.
+- LLM model served via Ollama, using Phi3-mini.
+- Additional LLM model - chatGPT-4o-mini (if an OpenAI key is provided).
+- Streamlit application for the front-end.
+- PostgreSQL database to store user interactions and feedback.
+- Grafana for monitoring and visualization, connected to PostgreSQL.
+
+All local endpoints are under the `localhost` domain.
+On the docker network, their domain corresponds to each specific container name.
+
+Python is used to build the Streamlit APP and interact with the different containers.
+
+Uses `.env` for environment variables.
+
+### Python Code
+Built using the `src` layout and poetry. 
+A simple `Makefile` is used to build the package. Has commands:
+- `make clean` - cleans the `dist`directory
+- `make build` - builds an new package.
+
+The app contains below sub-modules:
+- `db` - inits a postgres db in the postgres service and handles inserts.
+- `grafana` - can be used to init a predefined Grafana dashboard (`dashboard.json`)
+- `yt_info` - used to retrieve YT video data - basic details and transcript.
+- `yt_rag` - contains the streamlit app (`streamlit_app.py`), RAG agent (`agent.py`) and the Elasticsearch Index init script (`build_index.py`).
+
+`build_index.py` will read the static data present in the workspace and create the index from there.
+
+### setup_python.sh
+Used when starting up the `streamlit_app` container, installing dependencies, creating the Elasticsearch index and launching the Streamlit APP.
+
+
+### Docker 
+#### Elasticsearch
+- Serving as a Vector DB.
+- Runs as a single-node instance.
+- Java heap size is set to 2Gb (default heap is very large).
+- Container name: `elasticsearch`.
+- Accessible on port `9200`.
+
+#### LLM (Ollama)
+- Serving pre-trained Ollama/phi3-mini LLM model.
+- Custom setup script `install_phi3.sh` is used to install and configure the `phi3-mini` model.
+- Model data is stored in a Docker volume to persist between container restarts.
+- Container name `ollama`.
+- Accessible on port `11434`.
+
+#### Streamlit App
+- Using `python:3.10`.
+- Front-end to take user questions. Allows cycling between available models and different retrieval types.
+- The application code is mounted from the `src` directory.
+- Custom Python environment setup via `setup_python.sh`.
+- Container name `streamlit_app`.
+- `./data`directory with static video data.
+- Depends on below containers:
+    - Elasticsearch.
+    - Ollama.
+    - PostgreSQL.
+- Available on port `8501`.
+
+#### Postgres
+- Used to store user interactions - questions and feedback.
+- Container name `postgres`.
+- Available on port `5432`.
+
+#### Grafana
+- Provides monitoring and visualization of metrics, logs, and other data avaialbel in postgres.
+- Allows embedding dashboards for integration within the app.
+- Container name `grafana`.
+- ```user: 0```because of ownership issues when creating the grafana container.
+- Depends on:
+  - PostgreSQL.
+- Available on port `3000`.
+
+#### Volumes
+- **ollama**: A Docker volume used to persist LLM model data.
+
+
+### Notes
+- Static video data is available due to YT API rate limits.
+- Phi3-mini was chosen since it is free and small. 
+- Only integrated for CPU usage. 
+- Phi3-mini is very slow to run locally on CPU.
+
 
 
 ## How to Run
@@ -53,13 +137,14 @@ Setting up ```user: 0```because of ownership issues when creating the grafana co
 ### Prerequisites
 
 - Docker.
-- Python's build module
+- Python's build module. ```pip install build```
 - Clone the repo.
 - Environment variables:
-    1. Create copy of *sample.env* named *.env* in same directory.
-    2. Fill in variables.
+    1. Create copy of `sample.env` named `.env` in same directory.
+    2. Fill in missing variables (runs without them):
+        - `YT_API_KEY` - required to load different YT channels or new videos.
+        - `OPENAI_API_KEY` - required to use any OPENAI models.
 
-```Note: Limited Elasticsearch memory```
 
 ### Launching the Assistant
 
@@ -68,24 +153,27 @@ Setting up ```user: 0```because of ownership issues when creating the grafana co
 ```bash
 make build
 ```
-3. Build the container. This will:
+3. Build the containers. This will:
+    - Load the `Ollama/Phi3:mini`model (only if it is not available yet).
+    - Load the data from the predefined YT channels.
+    - Feed and index the KB.
+        - This is only done if the index doesn't exist in ElasticSearch.
+    - Launch the Streamlit App in a browser.
 ```bash
 docker compose up
 ```
-- Load the data from the predefined YT channels.
-- Feed and index the KB.
-    - This is only done if the index doesn't exist in ElasticSearch.
-- Launch the Streamlit App in a browser.
+
 
 
 ### Evaluation
 
-#### Retrieval
+#### Retrieval - using Hit Rate and MRR
 
-Old prompt + Title + descripts and Phi3-Mini and Temp = default yields 
-```{'hit_rate': 0.6947574718275356, 'mrr': 0.5127479915696481}```
-new prompt + Title + descripts and Phi3-Mini and Temp = 0 yields
-```{'hit_rate': 0.742724588781105, 'mrr': 0.5268124092038056}```
+| **Evaluation Method**                 | **Old Prompt** (Hit Rate, MRR)                          | **New Prompt** (Hit Rate, MRR)                          |
+|---------------------------------------|---------------------------------------------------------|---------------------------------------------------------|
+| **Text Search on Title and Description**| `0.4738`, `0.3782`                                      | `0.4698`, `0.3652`                                      |
+| **Cosine-KNN on Title**               | `0.5816`, `0.4664`                                      | `0.6141`, `0.4741`                                      |
+| **Cosine-KNN on CONCAT (Title + Description)** | `0.6281`, `0.5038`                                      | `0.6626`, `0.5158`                                      |
 
 #### RAG
 
@@ -96,8 +184,7 @@ new prompt + Title + descripts and Phi3-Mini and Temp = 0 yields
 * RAG flow
     * [x] 2 points: Both a knowledge base and an LLM are used in the RAG flow 
 * Retrieval evaluation
-    * [x] 1 point: Only one retrieval approach is evaluated
-    * [ ] 2 points: Multiple retrieval approaches are evaluated, and the best one is used
+    * [x] 2 points: Multiple retrieval approaches are evaluated, and the best one is used
 * RAG evaluation
     * [ ] 0 points: No evaluation of RAG is provided
     * [x] 1 point: Only one RAG approach (e.g., one prompt) is evaluated
@@ -107,9 +194,7 @@ new prompt + Title + descripts and Phi3-Mini and Temp = 0 yields
 * Ingestion pipeline
     * [x] 2 points: Automated ingestion with a Python script or a special tool (e.g., Mage, dlt, Airflow, Prefect)
 * Monitoring
-    * [ ] 0 points: No monitoring
-    * [ ] 1 point: User feedback is collected OR there's a monitoring dashboard
-    * [ ] 2 points: User feedback is collected and there's a dashboard with at least 5 charts
+    * [x] 2 points: User feedback is collected and there's a dashboard with at least 5 charts
 * Containerization
     * [x] 2 points: Everything is in docker-compose
 * Reproducibility
@@ -119,5 +204,3 @@ new prompt + Title + descripts and Phi3-Mini and Temp = 0 yields
     * [ ] Document re-ranking (1 point)
     * [ ] User query rewriting (1 point)
     * [x] Added tests for the ETL into KB.
-* Bonus points (not covered in the course)
-    * [ ] Deployment to the cloud (2 points)
