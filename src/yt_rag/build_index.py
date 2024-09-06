@@ -34,15 +34,25 @@ def embed_title(video: Video) -> np.array:
 def create_embeddings(
     videos: list[Video], embedding_function=embed_title_description
 ) -> list[np.array]:
+
     embeddings = []
     print("Starting embedding...")
+
     for video in tqdm(videos):
         embeddings.append(embedding_function(video))
+
     print("...embedding done.")
+
     return embeddings
 
 
-def build_index(videos: list[Video], embeddings, index_name, es_client=es_client):
+def build_index(
+    videos: list[Video],
+    embeddings,
+    index_name,
+    es_client=es_client,
+    field="title_description_vector",
+):
 
     index_settings = {
         "settings": {"number_of_shards": 1, "number_of_replicas": 0},
@@ -52,7 +62,7 @@ def build_index(videos: list[Video], embeddings, index_name, es_client=es_client
                 "is_short": {"type": "text"},
                 "description": {"type": "text"},
                 "video_id": {"type": "keyword"},
-                "title_description_vector": {
+                field: {
                     "type": "dense_vector",
                     "dims": 768,
                     "index": True,
@@ -69,7 +79,7 @@ def build_index(videos: list[Video], embeddings, index_name, es_client=es_client
     for video, emb in zip(tqdm(videos), embeddings):
         es_client.index(
             index=index_name,
-            document={**video.__dict__, **{"title_description_vector": emb}},
+            document={**video.__dict__, **{field: emb}},
         )
 
     print("...indexing done.")
