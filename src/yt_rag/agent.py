@@ -13,21 +13,39 @@ load_dotenv()
 embedding_model = SentenceTransformer("multi-qa-distilbert-cos-v1")
 
 ES_URL = os.getenv("LOCAL_ES_URL")
-INDEX_NAME = os.getenv("ES_INDEX_NAME")
+ES_INDEX_NAME = os.getenv("ES_INDEX_NAME")
 es_client = Elasticsearch(ES_URL)
 
 
 OLLAMA_URL = os.getenv("LOCAL_OLLAMA_URL")
 ollama_client = OpenAI(base_url=OLLAMA_URL, api_key="ollama")
 
-clients = {"ollama/phi3mini": ollama_client}
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+openai_client = OpenAI(api_key=OPENAI_API_KEY)
+
+clients = {
+    "ollama/phi3:mini": ollama_client,
+    "ollama/phi3:medium": ollama_client,
+    "openai/gpt-4o-mini": openai_client,
+}
+
+
+prompt_template = """
+You are a professional cook and recipe developer. Answer the QUESTION using only the information provided in the CONTEXT from the video transcript.
+Do not include any information, assumptions, or details not present in the CONTEXT. If the CONTEXT does not provide enough information to answer the QUESTION, acknowledge the limitation.
+
+QUESTION: {question}
+
+CONTEXT:
+{context}
+""".strip()
 
 
 def elastic_search_knn(field, vector, es_client=es_client):
     knn = {
         "field": field,
         "query_vector": vector,
-        "k": 20,
+        "k": 5,
         "num_candidates": 10000,
     }
 
@@ -36,7 +54,7 @@ def elastic_search_knn(field, vector, es_client=es_client):
         "_source": ["title", "is_short", "description", "video_id"],
     }
 
-    es_results = es_client.search(index=INDEX_NAME, body=search_query)
+    es_results = es_client.search(index=ES_INDEX_NAME, body=search_query)
 
     result_docs = []
 
@@ -63,7 +81,7 @@ def elastic_search_text(query):
         },
     }
 
-    response = es_client.search(index=INDEX_NAME, body=search_query)
+    response = es_client.search(index=ES_INDEX_NAME, body=search_query)
     return [hit["_source"] for hit in response["hits"]["hits"]]
 
 
@@ -74,16 +92,9 @@ def title_description_vector_knn(question: str) -> list[dict]:
     return elastic_search_knn("title_description_vector", vector)
 
 
-def build_prompt(query, videos: list[Video], transcripts: str) -> str:
-    prompt_template = """
-You are a professional cook and recipe developer. Answer the QUESTION using only the information provided in the CONTEXT from the video transcript.
-Do not include any information, assumptions, or details not present in the CONTEXT. If the CONTEXT does not provide enough information to answer the QUESTION, acknowledge the limitation.
-
-QUESTION: {question}
-
-CONTEXT:
-{context}
-""".strip()
+def build_prompt(
+    query, videos: list[Video], transcripts: str, prompt_template: str = prompt_template
+) -> str:
 
     context = "\n\n".join(
         [
@@ -94,10 +105,13 @@ CONTEXT:
     return prompt_template.format(question=query, context=context).strip()
 
 
-def llm(prompt, client=ollama_client):
+def llm(prompt, model_choice):
+    client = clients[model_choice]
+    model = model_choice.split("/")[1]
+
     start_time = time.time()
     response = client.chat.completions.create(
-        model="phi3", messages=[{"role": "user", "content": prompt}], temperature=0
+        model=model, messages=[{"role": "user", "content": prompt}], temperature=0
     )
     answer = response.choices[0].message.content
     tokens = {
@@ -131,7 +145,7 @@ def calculate_openai_cost(model_choice, tokens):
     return openai_cost
 
 
-def get_answer(query, model_choice="ollama/phi3mini", search_type="vector"):
+def get_answer(query, model_choice="ollama/phi3:mini", search_type="vector"):
 
     if search_type == "vector":
         videos = title_description_vector_knn(query)
@@ -146,7 +160,7 @@ def get_answer(query, model_choice="ollama/phi3mini", search_type="vector"):
 
     prompt = build_prompt(query, videos[:1], transcripts)
 
-    answer, response_time, tokens = llm(prompt, client=clients[model_choice])
+    answer, response_time, tokens = llm(prompt, model_choice=model_choice)
 
     openai_cost = calculate_openai_cost(model_choice, tokens)
 
