@@ -22,4 +22,4 @@ fi
 python3 app/yt_rag/build_index.py
 
 echo "Running Streamlit App"
-streamlit run app/yt_info/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+streamlit run app/yt_rag/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
