@@ -39,6 +39,7 @@ services:
       - elasticsearch
       - ollama
       - postgres
+      - grafana
       
     entrypoint: ["/usr/bin/bash", "/setup_python.sh"]
   

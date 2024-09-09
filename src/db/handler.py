@@ -73,16 +73,17 @@ def save_conversation(conversation_id, question, answer_data, timestamp=None):
             cur.execute(
                 """
                 INSERT INTO conversations 
-                (id, question, answer, model_used, response_time, relevance, 
+                (id, question, answer, model_used, search_type, response_time, relevance, 
                 relevance_explanation, prompt_tokens, completion_tokens, total_tokens, 
                 eval_prompt_tokens, eval_completion_tokens, eval_total_tokens, openai_cost, timestamp)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     conversation_id,
                     question,
                     answer_data["answer"],
                     answer_data["model_used"],
+                    answer_data["search_type"],
                     answer_data["response_time"],
                     answer_data["relevance"],
                     answer_data["relevance_explanation"],
@@ -175,10 +176,10 @@ def check_timezone():
             cur.execute(
                 """
                 INSERT INTO conversations 
-                (id, question, answer, model_used, response_time, relevance, 
+                (id, question, answer, model_used, search_type, response_time, relevance, 
                 relevance_explanation, prompt_tokens, completion_tokens, total_tokens, 
                 eval_prompt_tokens, eval_completion_tokens, eval_total_tokens, openai_cost, timestamp)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING timestamp;
             """,
                 (
@@ -186,6 +187,7 @@ def check_timezone():
                     "test question",
                     "test answer",
                     "test model",
+                    "test_search",
                     0.0,
                     0.0,
                     "test explanation",

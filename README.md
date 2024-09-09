@@ -2,14 +2,13 @@
 
 RAG implementation to provide relevant info from video transcripts of specific YT channels.
 
-Initially designed to serve as a cooking assistant, taking in cooking channels and providing recipes and tips based on the video transcripts.
+Designed to serve as a cooking assistant, taking in cooking channels and providing recipes and tips based on the video transcripts.
 
 This RAG flow can be easily adapted to other channels and make it quick to create new assistants.
 
 
 ## Flow
 
-Build knowledge base (KB) from YT videos data.
 1. List all videos from a given list of YT Channels and build KB from:
 - title
 - video id
@@ -158,12 +157,13 @@ make build
     - Load the data from the predefined YT channels.
     - Feed and index the KB.
         - This is only done if the index doesn't exist in ElasticSearch.
+    - Load the Grafana dashboard.
     - Launch the Streamlit App in a browser.
 ```bash
 docker compose up
 ```
 
-
+4. Access it on `http:\\localhost:8501`.
 
 ### Evaluation
 
@@ -177,7 +177,11 @@ docker compose up
 
 #### RAG
 
+No RAG evanluation was performed due to the time it takes to run some of the ground truth questions and the price of ChatGPT LLMs to evaluate the answers. The live evaluation is also not implemented.
+
+
 ## Scoring Objectives
+Keeping track of what is implemented, comparing to evaluation goals.
 
 * Problem description
     * [x] 2 points: The problem is well-described and it's clear what problem the project solves
@@ -186,8 +190,8 @@ docker compose up
 * Retrieval evaluation
     * [x] 2 points: Multiple retrieval approaches are evaluated, and the best one is used
 * RAG evaluation
-    * [x] 1 point: Only one RAG approach (e.g., one prompt) is evaluated
-    * [ ] 2 points: Multiple RAG approaches are evaluated, and the best one is used
+    * [x] points: No evaluation of retrieval is provided
+
 * Interface
     * [x] 2 points: UI (e.g., Streamlit), web application (e.g., Django), or an API (e.g., built with FastAPI) 
 * Ingestion pipeline
@@ -203,3 +207,9 @@ docker compose up
     * [ ] Document re-ranking (1 point)
     * [ ] User query rewriting (1 point)
     * [x] Added tests for the ETL into KB.
+
+
+## To Do
+
+- error handling if Open Ai key is missing or invalid, when trying to ask using Open AI model.
+

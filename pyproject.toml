@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "yt-summaries"
-version = "0.4.2"
+version = "0.4.4"
 description = ""
 authors = ["psousasa"]
 readme = "README.md"
