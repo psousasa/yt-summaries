@@ -21,5 +21,8 @@ fi
 # building the ES index from the default YT channel
 python3 app/yt_rag/build_index.py
 
+echo "Initilizing Grafana Dashboard"
+python3 app/grafana/init.py
+
 echo "Running Streamlit App"
 streamlit run app/yt_rag/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
