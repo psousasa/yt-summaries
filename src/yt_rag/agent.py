@@ -25,7 +25,7 @@ openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 clients = {
     "ollama/phi3:mini": ollama_client,
-    "ollama/phi3:medium": ollama_client,
+    "openai/gpt-3.5-turbo": openai_client,
     "openai/gpt-4o-mini": openai_client,
 }
 
@@ -37,6 +37,17 @@ Do not include any information, assumptions, or details not present in the CONTE
 QUESTION: {question}
 
 CONTEXT:
+{context}
+""".strip()
+
+
+old_prompt_template = """
+You're a cook and recipe developer. Answer the QUESTION based on the CONTEXT from the Video transcripts.
+Use only the facts from the CONTEXT when answering the QUESTION.
+
+QUESTION: {question}
+
+CONTEXT: 
 {context}
 """.strip()
 
@@ -126,10 +137,6 @@ def llm(prompt, model_choice):
     return answer, response_time, tokens
 
 
-def text_search(query):
-    pass
-
-
 def calculate_openai_cost(model_choice, tokens):
     openai_cost = 0
 
@@ -170,6 +177,7 @@ def get_answer(query, model_choice="ollama/phi3:mini", search_type="vector"):
         "relevance": "NOT_IMPLEMENTED",
         "relevance_explanation": "NOT_IMPLEMENTED",
         "model_used": model_choice,
+        "search_type": search_type,
         "prompt_tokens": tokens["prompt_tokens"],
         "completion_tokens": tokens["completion_tokens"],
         "total_tokens": tokens["total_tokens"],
