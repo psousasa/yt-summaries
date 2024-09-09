@@ -33,6 +33,7 @@ def init_db():
                     question TEXT NOT NULL,
                     answer TEXT NOT NULL,
                     model_used TEXT NOT NULL,
+                    search_type TEXT NOT NULL,
                     response_time FLOAT NOT NULL,
                     relevance TEXT NOT NULL,
                     relevance_explanation TEXT NOT NULL,
