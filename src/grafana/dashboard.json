@@ -32,7 +32,7 @@
       "datasource": {
         "default": true,
         "type": "grafana-postgresql-datasource",
-        "uid": "edxdqxlcm8hdse"
+        "uid": "ddxgndafiexogc"
       },
       "fieldConfig": {
         "defaults": {
@@ -145,7 +145,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "edxdqxlcm8hdse"
+        "uid": "ddxgndafiexogc"
       },
       "fieldConfig": {
         "defaults": {
@@ -230,7 +230,7 @@
       "datasource": {
         "default": true,
         "type": "grafana-postgresql-datasource",
-        "uid": "edxdqxlcm8hdse"
+        "uid": "ddxgndafiexogc"
       },
       "fieldConfig": {
         "defaults": {
@@ -359,7 +359,7 @@
       "datasource": {
         "default": true,
         "type": "grafana-postgresql-datasource",
-        "uid": "edxdqxlcm8hdse"
+        "uid": "ddxgndafiexogc"
       },
       "fieldConfig": {
         "defaults": {
@@ -480,7 +480,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "edxdqxlcm8hdse"
+        "uid": "ddxgndafiexogc"
       },
       "fieldConfig": {
         "defaults": {
@@ -586,13 +586,14 @@
           }
         }
       ],
-      "title": "OpenAI cost",
+      "title": "TS - OpenAI cost",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "postgres",
-        "uid": "edxdqxlcm8hdse"
+        "default": true,
+        "type": "grafana-postgresql-datasource",
+        "uid": "ddxgndafiexogc"
       },
       "fieldConfig": {
         "defaults": {
@@ -698,6 +699,117 @@
       ],
       "title": "Model used",
       "type": "barchart"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "grafana-postgresql-datasource",
+        "uid": "ddxgndafiexogc"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "id": 16,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "never",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ddxgndafiexogc"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  search_type,\n  COUNT(*) as count\nFROM conversations\nWHERE timestamp BETWEEN $__timeFrom() AND $__timeTo()\nGROUP BY search_type\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Retrieval Method",
+      "type": "barchart"
     }
   ],
   "refresh": "30s",
@@ -713,7 +825,7 @@
   "timepicker": {},
   "timezone": "",
   "title": "YT Summaries for Cooking",
-  "uid": "fdxdqxleu58g0f",
-  "version": 2,
+  "uid": "adxgndahdu70gf",
+  "version": 1,
   "weekStart": ""
 }

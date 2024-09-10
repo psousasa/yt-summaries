@@ -1,22 +1,23 @@
-# yt-summaries
+# YT-Cooking-Summaries
 
-RAG implementation to provide relevant info from video transcripts of specific YT channels.
+RAG implementation to transform video content from specific YouTube cooking channels into personalized recipes and helpful tips. 
 
-Designed to serve as a cooking assistant, taking in cooking channels and providing recipes and tips based on the video transcripts.
+This cooking assistant pulls insights directly from video transcripts, making it easy to access the information you need without watching the entire video.
 
-This RAG flow can be easily adapted to other channels and make it quick to create new assistants.
+With a flexible framework, this approach can be quickly adapted to other YouTube channels, allowing for the rapid creation of customized assistants in any niche.
 
+![alt text](images/cooking_robot.png)
 
 ## Flow
 
 1. List all videos from a given list of YT Channels and build KB from:
-- title
-- video id
-- description
-- if it is a short format video *.
-2. Index the KB on the videos title and description. 
+    - title
+    - video id
+    - description
+    - if it is a short format video *.
+2. Index the KB on the concatenation of video title and description. 
 3. Get user query through Streamlit.
-4. Query the KB and get relevant videos.
+4. Query the KB and retrieve relevant videos.
 5. Get the transcripts of the relevant videos.
 6. Call the LLM, asking it to summarize and retrieve recipes from the transcripts.
 7. Output the summary through Streamlit.
@@ -31,28 +32,25 @@ This RAG flow can be easily adapted to other channels and make it quick to creat
 
 The dataset is made of YT videos info - details and english transcript. The channel(s) from which to retrieve the videos needs to be predefined. The cooking channel [Joshua Weissman](https://www.youtube.com/@JoshuaWeissman) was used.
 
-**YT Video Details** retrieved using:
-```python
-pip install google-api-python-client
-```
+**YT Video Details** retrieved requiring:
+`pip install google-api-python-client`
 
 
-**YT Video Transcripts** retrieved using:
-```python
-pip install youtube-transcript-api
-```
+**YT Video Transcripts** retrieved requiring:
+`youtube-transcript-api`
+
 
 ## Setup
 
-This project uses Docker Compose to orchestrate various services for a scalable, AI-powered application. The setup includes:
+This project uses `Docker Compose` to orchestrate various services for a scalable, AI-powered application. The setup includes:
 - Elasticsearch for the vector db.
 - LLM model served via Ollama, using Phi3-mini.
 - Additional LLM model - chatGPT-4o-mini (if an OpenAI key is provided).
 - Streamlit application for the front-end.
 - PostgreSQL database to store user interactions and feedback.
-- Grafana for monitoring and visualization, connected to PostgreSQL.
+- Grafana for monitoring, connected to PostgreSQL.
 
-All local endpoints are under the `localhost` domain.
+Locally, all endpoints are under the `localhost` domain.
 On the docker network, their domain corresponds to each specific container name.
 
 Python is used to build the Streamlit APP and interact with the different containers.
@@ -61,17 +59,18 @@ Uses `.env` for environment variables.
 
 ### Python Code
 Built using the `src` layout and poetry. 
-A simple `Makefile` is used to build the package. Has commands:
+A simple `Makefile` is used to build the package, with commands:
 - `make clean` - cleans the `dist`directory
-- `make build` - builds an new package.
+- `make build` - builds an new package into `dist` directory.
+
 
 The app contains below sub-modules:
 - `db` - inits a postgres db in the postgres service and handles inserts.
-- `grafana` - can be used to init a predefined Grafana dashboard (`dashboard.json`)
+- `grafana` - used to init a predefined Grafana dashboard (`dashboard.json`)
 - `yt_info` - used to retrieve YT video data - basic details and transcript.
-- `yt_rag` - contains the streamlit app (`streamlit_app.py`), RAG agent (`agent.py`) and the Elasticsearch Index init script (`build_index.py`).
+- `yt_rag` - contains the streamlit app (`streamlit_app.py`), RAG agent (`agent.py`) and the Elasticsearch Index init script (`build_index.py`*).
 
-`build_index.py` will read the static data present in the workspace and create the index from there.
+*`build_index.py` will read the static data present in the workspace and create the index from there.
 
 ### setup_python.sh
 Used when starting up the `streamlit_app` container, installing dependencies, creating the Elasticsearch index and launching the Streamlit APP.
@@ -177,7 +176,21 @@ docker compose up
 
 #### RAG
 
-No RAG evanluation was performed due to the time it takes to run some of the ground truth questions and the price of ChatGPT LLMs to evaluate the answers. The live evaluation is also not implemented.
+No RAG evaluation was performed due to the time it takes to run some of the ground truth questions with Ollama/Phi3-mini and the price of ChatGPT LLMs to evaluate the answers. The live evaluation is also not implemented.
+
+
+## Dashboard
+The Dashboard was implemented using Grafana. It tracks:
+- Latest conversations. 
+- User feedback.
+- Time Series on: 
+    - Response Time per Model.
+    - Tokens per Model.
+    - OpenAI cost.
+- Models used.
+- Retrieval Method.
+
+![alt text](images/dashboard_screenshot.png)
 
 
 ## Scoring Objectives
