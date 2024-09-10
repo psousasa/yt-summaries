@@ -164,6 +164,24 @@ docker compose up
 
 4. Access it on `http:\\localhost:8501`.
 
+#### Running local notebooks
+
+Notebooks on data exploration, generating the ground truth and evaluating the retrieval can be found under `notebooks` directory.
+
+The notebooks use the `LOCAL_*` environment variables.
+Before running the notebooks, follow below steps with `python 3.10` - ideally on an empty virtual environment:
+
+On a terminal window running on the root of the project:
+```bash
+make build
+```
+
+Followed by below:
+```bash
+pip install yt_summaries-0.4.4-py3-none-any.whl
+```
+
+
 ### Evaluation
 
 #### Retrieval - using Hit Rate and MRR
@@ -173,6 +191,10 @@ docker compose up
 | **Text Search on Title and Description**| `0.4738`, `0.3782`                                      | `0.4698`, `0.3652`                                      |
 | **Cosine-KNN on Title**               | `0.5816`, `0.4664`                                      | `0.6141`, `0.4741`                                      |
 | **Cosine-KNN on CONCAT (Title + Description)** | `0.6281`, `0.5038`                                      | `0.6626`, `0.5158`                                      |
+| **Cosine-KNN on CONCAT (Title + Description) + Hybrid RFF** | `0.6325`, `0.5082`                                      | `0.6520`, `0.5120`                                      |
+
+
+Given above results, the RAG uses Cosine-KNN on CONCAT (Title + Description) retrieval.	
 
 #### RAG
 
@@ -216,13 +238,16 @@ Keeping track of what is implemented, comparing to evaluation goals.
 * Reproducibility
     * [x] 2 points: Instructions are clear, the dataset is accessible, it's easy to run the code, and it works. The versions for all dependencies are specified.
 * Best practices
-    * [ ] Hybrid search: combining both text and vector search (at least evaluating it) (1 point)
-    * [ ] Document re-ranking (1 point)
+    * [x] Hybrid search: combining both text and vector search (at least evaluating it) (1 point)
+    * [x] Document re-ranking (1 point)
     * [ ] User query rewriting (1 point)
     * [x] Added tests for the ETL into KB.
 
 
 ## To Do
 
-- error handling if Open Ai key is missing or invalid, when trying to ask using Open AI model.
+- Error handling if Open Ai key is missing or invalid, when trying to ask using Open AI model.
+- RAG evaluation
+- Question rewriting
+
 
